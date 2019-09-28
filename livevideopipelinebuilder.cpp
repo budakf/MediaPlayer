@@ -2,6 +2,7 @@
 
 LiveVideoPipelineBuilder::LiveVideoPipelineBuilder(){
     qDebug()<<"LiveVideoPipelineBuilder::LiveVideoPipelineBuilder";
+    gst_init(NULL, NULL);
 }
 
 LiveVideoPipelineBuilder::~LiveVideoPipelineBuilder(){
@@ -49,7 +50,8 @@ void LiveVideoPipelineBuilder::addElements(){
     gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.depayloader, mPipeline.decoder , mPipeline.sink, NULL);
 }
 
-static void onPadAdded(GstElement *src, GstPad *newPad, gpointer sink) {
+
+void onPadAddedForLiveVideo(GstElement *src, GstPad *newPad, gpointer sink) {
     GstPad *sink_pad = gst_element_get_static_pad ((GstElement *)sink, "sink");
     GstPadLinkReturn ret;
 
@@ -72,12 +74,44 @@ static void onPadAdded(GstElement *src, GstPad *newPad, gpointer sink) {
 
 }
 
+
+gboolean getMessageFromBusForLiveVideo(GstBus * bus, GstMessage * message, gpointer data){
+    g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
+
+    switch (GST_MESSAGE_TYPE(message) ) {
+        case GST_MESSAGE_ERROR:
+        {
+            GError *err;
+            gchar *debug;
+
+            gst_message_parse_error (message, &err, &debug);
+            g_print ("Error: %s\n", err->message);
+            g_error_free (err);
+            g_free (debug);
+            break;
+        }
+        case GST_MESSAGE_STATE_CHANGED:
+            //
+            break;
+        case GST_MESSAGE_EOS:
+            //
+          break;
+        default:
+          break;
+    }
+
+
+    return TRUE;
+
+}
+
+
 void LiveVideoPipelineBuilder::linkElements(){
     if( !gst_element_link(mPipeline.source, mPipeline.depayloader) ){
         g_printerr ("Source and Depayloader could not be linked.\n");
     }
 
-    g_signal_connect(mPipeline.source, "pad-added", G_CALLBACK (onPadAdded), mPipeline.depayloader);
+    g_signal_connect(mPipeline.source, "pad-added", G_CALLBACK (onPadAddedForLiveVideo), mPipeline.depayloader);
 
     if(!gst_element_link(mPipeline.depayloader, mPipeline.decoder) ){
         g_printerr ("Depayloader and Decoder could not be linked.\n");
@@ -89,17 +123,30 @@ void LiveVideoPipelineBuilder::linkElements(){
 
 }
 
-void LiveVideoPipelineBuilder::buildPipeline(long long int pWindowID){
+void LiveVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long long int pWindowID){
     this->setBin(std::string("pipeline"));
     this->setSource(std::string("rtspsrc"), std::string("source"));
     this->setDepayloader(std::string("rtph264depay"), std::string("depayloader"));
     this->setDecoder(std::string("avdec_h264"), std::string("decoder"));
     this->setSink(std::string("glimagesink"), std::string("sink"));
     this->setLiveness(true);
-    this->setPropertiesOfGstElement(std::string("rtsp://semerkandglb.mediatriple.net:1935/semerkandliveedge/semerkand2"), pWindowID);
+    this->setPropertiesOfGstElement(pResourcePath, pWindowID);
     this->addElements();
     this->linkElements();
-    this->setState(GstState::GST_STATE_NULL);
+    this->setState(GstState::GST_STATE_READY);
 }
+
+
+void LiveVideoPipelineBuilder::setBus(){
+    mPipeline.bus = gst_pipeline_get_bus (GST_PIPELINE (mPipeline.bin));
+    gst_bus_add_watch (mPipeline.bus, getMessageFromBusForLiveVideo, NULL);
+}
+
+void LiveVideoPipelineBuilder::destroyPipeline(){
+    g_object_unref(mPipeline.bus);
+    gst_element_set_state(mPipeline.bin, GST_STATE_NULL);
+    g_object_unref(mPipeline.bin);
+}
+
 
 

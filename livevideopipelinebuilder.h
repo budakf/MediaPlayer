@@ -19,11 +19,16 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
     void setPropertiesOfGstElement(std::string, long long int);
     void addElements();
     void linkElements();
+    void setBus();
+    void destroyPipeline();
+
+    friend gboolean getMessageFromBusForLiveVideo(GstBus * bus, GstMessage * message, gpointer data);
+    friend void onPadAddedForLiveVideo(GstElement *src, GstPad *newPad, gpointer sink);
 
 public:
     LiveVideoPipelineBuilder();
     ~LiveVideoPipelineBuilder();
-    void buildPipeline(long long int);
+    void buildPipeline(std::string, long long int);
     Pipeline & getPipeline(){
         return mPipeline;
     }

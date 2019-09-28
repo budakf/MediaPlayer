@@ -45,12 +45,15 @@
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">Background-color:&quot;gray&quot;;</string>
+       <string notr="true">Background-color:&quot;lightgray&quot;;</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QSlider" name="mSlider">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="minimumSize">
        <size>
         <width>600</width>
@@ -69,21 +72,24 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="mRewindBtn">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>90</width>
-          <height>30</height>
+          <width>70</width>
+          <height>20</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>90</width>
-          <height>30</height>
+          <width>70</width>
+          <height>20</height>
          </size>
         </property>
         <property name="styleSheet">
          <string notr="true">Background-color:&quot;white&quot;;
-border-radius:10;</string>
+</string>
         </property>
         <property name="text">
          <string>Rewind</string>
@@ -92,21 +98,24 @@ border-radius:10;</string>
       </item>
       <item>
        <widget class="QPushButton" name="mPlayBtn">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>80</width>
-          <height>30</height>
+          <width>70</width>
+          <height>20</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>80</width>
-          <height>30</height>
+          <width>70</width>
+          <height>20</height>
          </size>
         </property>
         <property name="styleSheet">
          <string notr="true">Background-color:&quot;white&quot;;
-border-radius:10;</string>
+</string>
         </property>
         <property name="text">
          <string>Play</string>
@@ -114,22 +123,25 @@ border-radius:10;</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="mForwardButton">
+       <widget class="QPushButton" name="mForwardBtn">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>90</width>
-          <height>30</height>
+          <width>70</width>
+          <height>20</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>90</width>
-          <height>30</height>
+          <width>70</width>
+          <height>20</height>
          </size>
         </property>
         <property name="styleSheet">
          <string notr="true">Background-color:&quot;white&quot;;
-border-radius:10;</string>
+</string>
         </property>
         <property name="text">
          <string>Forward</string>
@@ -149,7 +161,106 @@ border-radius:10;</string>
      <height>22</height>
     </rect>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>600</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
+   </property>
+   <widget class="QMenu" name="menuMediaPlayer">
+    <property name="title">
+     <string>MediaPlayer</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>false</bool>
+    </property>
+    <addaction name="actionAboutMediaPlayer"/>
+    <addaction name="actionQuitMediaPlayer"/>
+   </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpenNewFile"/>
+    <addaction name="actionOpenNetwork"/>
+   </widget>
+   <widget class="QMenu" name="menuAudio">
+    <property name="title">
+     <string>Audio</string>
+    </property>
+    <addaction name="actionVolumeUp"/>
+    <addaction name="actionVolumeDown"/>
+   </widget>
+   <widget class="QMenu" name="menuVideo">
+    <property name="title">
+     <string>Video</string>
+    </property>
+    <addaction name="actionRGB"/>
+    <addaction name="actionGrayScale"/>
+   </widget>
+   <addaction name="menuMediaPlayer"/>
+   <addaction name="menuFile"/>
+   <addaction name="menuAudio"/>
+   <addaction name="menuVideo"/>
   </widget>
+  <action name="actionAboutMediaPlayer">
+   <property name="text">
+    <string>About MediaPlayer</string>
+   </property>
+  </action>
+  <action name="actionDevelopmentTeam">
+   <property name="text">
+    <string>Development Team</string>
+   </property>
+  </action>
+  <action name="actionOpenNewFile">
+   <property name="text">
+    <string>Open New File</string>
+   </property>
+  </action>
+  <action name="actionOpenNetwork">
+   <property name="text">
+    <string>Open Network</string>
+   </property>
+  </action>
+  <action name="actionShortCuts">
+   <property name="text">
+    <string>Short Cuts</string>
+   </property>
+  </action>
+  <action name="actionAbout_Medai_Player">
+   <property name="text">
+    <string>About Media Player</string>
+   </property>
+  </action>
+  <action name="actionVolumeUp">
+   <property name="text">
+    <string>Volume Up</string>
+   </property>
+  </action>
+  <action name="actionVolumeDown">
+   <property name="text">
+    <string>Volume Down</string>
+   </property>
+  </action>
+  <action name="actionRGB">
+   <property name="text">
+    <string>RGB</string>
+   </property>
+  </action>
+  <action name="actionGrayScale">
+   <property name="text">
+    <string>Gray Scale</string>
+   </property>
+  </action>
+  <action name="actionQuitMediaPlayer">
+   <property name="text">
+    <string>Quit MediaPlayer</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

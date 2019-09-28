@@ -2,7 +2,7 @@
 #define RECORDEDVIDEOPIPELINE_H
 
 #include "ipipelinebuilder.h"
-
+#include <QDebug>
 
 class RecordedVideoPipelineBuilder: public IPipelineBuilder{
 
@@ -18,11 +18,17 @@ class RecordedVideoPipelineBuilder: public IPipelineBuilder{
     void setPropertiesOfGstElement(std::string, long long int);
     void addElements();
     void linkElements();
+    void setBus();
+    void destroyPipeline();
+
+
+    friend gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, gpointer data);
+    friend void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink);
 
 public:
     RecordedVideoPipelineBuilder();
     ~RecordedVideoPipelineBuilder();
-    void buildPipeline(long long int);
+    void buildPipeline(std::string, long long int);
     Pipeline & getPipeline(){
         return mPipeline;
     }

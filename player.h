@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QTimer>
+
 #include <iostream>
 #include <memory>
 
@@ -34,6 +36,7 @@ private:
     std::string mResourcePath;
     PlayerState mState;
     bool mRunning;
+    QTimer* mTimer;
 
     void setMenus();
     void setMediaPlayerMenu();
@@ -57,6 +60,7 @@ private slots:
     void on_mRewindBtn_clicked();
     void on_mForwardBtn_clicked();
     void on_mSlider_sliderReleased();
+    void improveSlider();
 };
 
 #endif // PLAYER_H

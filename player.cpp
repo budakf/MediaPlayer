@@ -7,6 +7,8 @@ Player::Player(QWidget *parent) :
     setMenus();
     mState = PlayerState::NULLSTATE;
     mRunning = false;
+    mTimer = new QTimer(this);
+    connect(mTimer, &QTimer::timeout, this, &Player::improveSlider);
 }
 
 Player::~Player(){
@@ -63,7 +65,7 @@ void Player::openAboutMediaPlayerDialog(){
 void Player::openNewFileDialog(){
     mResourcePath.clear();
     mResourcePath = QFileDialog::getOpenFileName(this, tr("Open Video"),
-                             "/home/Desktop", tr("Video Files (*.mp4)")).toStdString();
+                             "/home", tr("Video Files (*.mp4)")).toStdString();
 
     if(!mResourcePath.empty()){
         mPipelineBuilder.reset(nullptr);
@@ -112,18 +114,24 @@ void Player::convertGrayScale(){
 }
 
 void Player::play(){
-    gst_element_set_state (mPipelineBuilder->getPipeline().bin, GST_STATE_PLAYING);
+    gst_element_set_state(mPipelineBuilder->getPipeline().bin, GST_STATE_PLAYING);
     enablePlayingButtons(true);
     ui->mPlayBtn->setText("Pause");
     mRunning = true;
-
+    if(mState == PlayerState::RECORDEDSTATE)
+        mTimer->start(1000);
+    else if(mState == PlayerState::LIVESTATE)
+        ui->mSlider->setValue(ui->mSlider->maximum());
 }
+
 void Player::stop(){
     gst_element_set_state (mPipelineBuilder->getPipeline().bin, GST_STATE_NULL);
 }
+
 void Player::pause(){
-    gst_element_set_state (mPipelineBuilder->getPipeline().bin, GST_STATE_PAUSED);
+    gst_element_set_state(mPipelineBuilder->getPipeline().bin, GST_STATE_PAUSED);
     mRunning = false;
+    mTimer->stop();
 }
 
 void Player::enablePlayingButtons(bool pEnabled){
@@ -147,30 +155,37 @@ void Player::on_mPlayBtn_clicked(){
 void Player::on_mRewindBtn_clicked(){
     gint64 position;
     gst_element_query_position(mPipelineBuilder->getPipeline().bin ,GST_FORMAT_TIME, &position);
-
     gint64 newPosition = (position - 10 * GST_SECOND) < 0  ?  0 : (position - 10 * GST_SECOND);
-
     gst_element_seek_simple(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME,
                             GST_SEEK_FLAG_FLUSH, newPosition);
+    ui->mSlider->setValue(newPosition/GST_SECOND);
 }
 
 void Player::on_mForwardBtn_clicked(){
     gint64 length, position;
     gst_element_query_position(mPipelineBuilder->getPipeline().bin ,GST_FORMAT_TIME, &position);
     gst_element_query_duration(mPipelineBuilder->getPipeline().bin ,GST_FORMAT_TIME, &length);
-
     gint64 newPosition = (position + 10 * GST_SECOND) > length ? length : (position + 10 * GST_SECOND);
-
     gst_element_seek_simple(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME,
                             GST_SEEK_FLAG_FLUSH, newPosition);
+    ui->mSlider->setValue(newPosition/GST_SECOND);
 }
 
 void Player::on_mSlider_sliderReleased(){
     qint64 length, newPosition;
     gst_element_query_duration(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME, &length);
-    newPosition = ui->mSlider->value() * 0.01 * length;
-    qDebug()<<ui->mSlider->value() << newPosition << length;
-
+    newPosition = ui->mSlider->value() * GST_SECOND;
+    qDebug()<<ui->mSlider->value() << newPosition/GST_SECOND << length/GST_SECOND;
     gst_element_seek_simple(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME,
                             GST_SEEK_FLAG_FLUSH, newPosition);
+}
+
+
+void Player::improveSlider(){
+    qint64 length;
+    gst_element_query_duration(mPipelineBuilder->getPipeline().bin ,GST_FORMAT_TIME, &length);
+    int max = length/GST_SECOND;
+    int older = ui->mSlider->value();
+    ui->mSlider->setMaximum(max);
+    ui->mSlider->setValue(++older);
 }

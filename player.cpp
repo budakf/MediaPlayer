@@ -74,6 +74,7 @@ void Player::openNewFileDialog(){
         mState = PlayerState::RECORDEDSTATE;
         ui->mRewindBtn->show();
         ui->mForwardBtn->show();
+        ui->mSlider->setValue(0);
         play();
     }
 }
@@ -118,10 +119,13 @@ void Player::play(){
     enablePlayingButtons(true);
     ui->mPlayBtn->setText("Pause");
     mRunning = true;
-    if(mState == PlayerState::RECORDEDSTATE)
+    if(mState == PlayerState::RECORDEDSTATE){
         mTimer->start(1000);
-    else if(mState == PlayerState::LIVESTATE)
+    }
+    else if(mState == PlayerState::LIVESTATE){
         ui->mSlider->setValue(ui->mSlider->maximum());
+        ui->mSlider->setDisabled(true);
+    }
 }
 
 void Player::stop(){

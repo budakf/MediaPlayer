@@ -17,7 +17,7 @@ struct Pipeline{
     GstElement* audioqueue;
     GstElement* audiodepayloader;    // only for live video
     GstElement* audiodecoder;
-    GstElement* audioconvertor;
+    GstElement* audioconvertor;      // only for live video
     GstElement* audiosink;
     GstBus* bus;
     GstState state;
@@ -34,8 +34,13 @@ public:
 private:
     virtual void setBin(std::string) = 0;
     virtual void setSource(std::string, std::string) = 0;
-    virtual void setDecoder(std::string, std::string) = 0;
+    virtual void setVideoQueue(std::string, std::string) = 0;
+    virtual void setVideoDecoder(std::string, std::string) = 0;
     virtual void setVideoSink(std::string, std::string) = 0;
+    virtual void setAudioQueue(std::string, std::string) = 0;
+    virtual void setAudioDecoder(std::string, std::string) = 0;
+    virtual void setAudioSink(std::string, std::string) = 0;
+
     virtual void setState(GstState) = 0;
     virtual void setLiveness(bool) = 0;
     virtual void setPropertiesOfGstElement(std::string, long long int) = 0;

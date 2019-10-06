@@ -13,25 +13,42 @@ void RecordedVideoPipelineBuilder::setBin(std::string pipelineName){
     mPipeline.bin = gst_pipeline_new(pipelineName.data());
 }
 
-
 void RecordedVideoPipelineBuilder::setSource(std::string sourceType, std::string sourceName){
     mPipeline.source = gst_element_factory_make(sourceType.data(), sourceName.data());
 }
 
-
-void RecordedVideoPipelineBuilder::setDecoder(std::string decoderType, std::string decoderName){
-    mPipeline.videodecoder = gst_element_factory_make(decoderType.data(), decoderName.data());
+void RecordedVideoPipelineBuilder::setDemuxer(std::string demuxerType, std::string demuxerName){
+    mPipeline.demuxer = gst_element_factory_make(demuxerType.data(), demuxerName.data());
 }
 
+void RecordedVideoPipelineBuilder::setVideoQueue(std::string queueType, std::string queueName){
+    mPipeline.videoqueue = gst_element_factory_make(queueType.data(), queueName.data());
+}
+
+void RecordedVideoPipelineBuilder::setVideoDecoder(std::string videodecoderType, std::string videodecoderName){
+    mPipeline.videodecoder = gst_element_factory_make(videodecoderType.data(), videodecoderName.data());
+}
 
 void RecordedVideoPipelineBuilder::setVideoSink(std::string sinkType, std::string sinkName){
     mPipeline.videosink = gst_element_factory_make(sinkType.data(), sinkName.data());
 }
 
+void RecordedVideoPipelineBuilder::setAudioQueue(std::string queueType, std::string queueName){
+    mPipeline.audioqueue = gst_element_factory_make(queueType.data(), queueName.data());
+
+}
+
+void RecordedVideoPipelineBuilder::setAudioDecoder(std::string audiodecoderType, std::string audiodecoderName){
+    mPipeline.audiodecoder = gst_element_factory_make(audiodecoderType.data(), audiodecoderName.data());
+}
+
+void RecordedVideoPipelineBuilder::setAudioSink(std::string audiosinkType, std::string audiosinkName){
+    mPipeline.audiosink = gst_element_factory_make(audiosinkType.data(), audiosinkName.data());
+}
+
 void RecordedVideoPipelineBuilder:: setState(GstState){
     mPipeline.state = GstState::GST_STATE_PAUSED;
 }
-
 
 void RecordedVideoPipelineBuilder::setLiveness(bool livenessState){
     mPipeline.isLive = livenessState;
@@ -43,10 +60,12 @@ void RecordedVideoPipelineBuilder::setPropertiesOfGstElement(std::string pFileLo
 }
 
 void RecordedVideoPipelineBuilder::addElements(){
-    if(!mPipeline.bin || !mPipeline.source || !mPipeline.videodecoder || !mPipeline.videosink){
+    if(!mPipeline.bin || !mPipeline.source || !mPipeline.demuxer || !mPipeline.videoqueue || !mPipeline.videodecoder ||
+       !mPipeline.videosink || !mPipeline.audioqueue || !mPipeline.audiodecoder || !mPipeline.audiosink){
         g_printerr("All element could not created\n");
     }
-    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.videodecoder , mPipeline.videosink, NULL);
+    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.demuxer, mPipeline.videoqueue,
+                      mPipeline.videodecoder , mPipeline.videosink, mPipeline.audioqueue, mPipeline.audiodecoder, mPipeline.audiosink, NULL);
 }
 
 void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink) {
@@ -107,23 +126,51 @@ gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, g
 
 
 void RecordedVideoPipelineBuilder::linkElements(){
-    if( !gst_element_link(mPipeline.source, mPipeline.videodecoder) ){
-        g_printerr ("Source and decoder could not be linked.\n");
+    if( !gst_element_link(mPipeline.source, mPipeline.demuxer) ){
+        g_printerr ("Source and Demuxer could not be linked.\n");
+    }
+
+    if( !gst_element_link(mPipeline.demuxer, mPipeline.videoqueue) ){
+        g_printerr ("Demuxer and Videoqueue could not be linked.\n");
+    }
+
+    if( !gst_element_link(mPipeline.videoqueue, mPipeline.videodecoder) ){
+        g_printerr ("Videoqueue and Videodecoder could not be linked.\n");
     }
 
     if(!gst_element_link(mPipeline.videodecoder, mPipeline.videosink) ){
-        g_printerr ("Decoder and sink could not be linked.\n");
+        g_printerr ("Videodecoder and Videosink could not be linked.\n");
     }
 
+    if( !gst_element_link(mPipeline.demuxer, mPipeline.audioqueue) ){
+        g_printerr ("Demuxer and Audioqueue could not be linked.\n");
+    }
+
+    if( !gst_element_link(mPipeline.audioqueue, mPipeline.audiodecoder) ){
+        g_printerr ("Audioqueue and Audiodecoder could not be linked.\n");
+    }
+
+    if( !gst_element_link(mPipeline.audiodecoder, mPipeline.audiosink) ){
+        g_printerr ("Audiodecoder and Audiosink could not be linked.\n");
+    }
+    g_signal_connect(mPipeline.demuxer, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.videoqueue);
     g_signal_connect(mPipeline.videodecoder, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.videosink);
+    g_signal_connect(mPipeline.demuxer, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.audioqueue);
+
 }
 
 
 void RecordedVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long long int pWindowID){
     this->setBin(std::string("pipeline"));
     this->setSource(std::string("filesrc"), std::string("source"));
-    this->setDecoder(std::string("decodebin"), std::string("decoder"));
-    this->setVideoSink(std::string("glimagesink"), std::string("sink"));
+    this->setDemuxer(std::string("qtdemux"), std::string("demuxer"));
+    this->setVideoQueue(std::string("queue"), std::string("videoqueue"));
+    this->setVideoDecoder(std::string("decodebin"), std::string("videodecoder"));
+    this->setVideoSink(std::string("glimagesink"), std::string("videosink"));
+    this->setAudioQueue(std::string("queue"), std::string("audioqueue"));
+    this->setAudioDecoder(std::string("faad"), std::string("audiodecoder"));
+    this->setAudioSink(std::string("autoaudiosink"), std::string("audiosink"));
+
     this->setLiveness(false);
     this->setPropertiesOfGstElement(pResourcePath, pWindowID);
     this->addElements();
@@ -134,7 +181,6 @@ void RecordedVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long
 }
 
 void RecordedVideoPipelineBuilder::setBus(){
-    qDebug()<<"svsdvsd";
     mPipeline.bus = gst_pipeline_get_bus (GST_PIPELINE (mPipeline.bin));
     gst_bus_add_watch (mPipeline.bus, (GstBusFunc) getMessageFromBusForRecordedVideo, this);
 }

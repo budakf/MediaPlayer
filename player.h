@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QTimer>
+#include <QDateTime>
 
 #include <iostream>
 #include <memory>
@@ -61,6 +62,7 @@ private slots:
     void on_mForwardBtn_clicked();
     void on_mSlider_sliderReleased();
     void improveSlider();
+    void setVideoTime();
 };
 
 #endif // PLAYER_H

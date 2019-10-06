@@ -13,7 +13,7 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
     void setSource(std::string, std::string);
     void setDepayloader(std::string, std::string);
     void setDecoder(std::string, std::string);
-    void setSink(std::string, std::string);
+    void setVideoSink(std::string, std::string);
     void setState(GstState);
     void setLiveness(bool);
     void setPropertiesOfGstElement(std::string, long long int);

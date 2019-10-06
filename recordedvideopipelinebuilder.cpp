@@ -20,12 +20,12 @@ void RecordedVideoPipelineBuilder::setSource(std::string sourceType, std::string
 
 
 void RecordedVideoPipelineBuilder::setDecoder(std::string decoderType, std::string decoderName){
-    mPipeline.decoder = gst_element_factory_make(decoderType.data(), decoderName.data());
+    mPipeline.videodecoder = gst_element_factory_make(decoderType.data(), decoderName.data());
 }
 
 
-void RecordedVideoPipelineBuilder::setSink(std::string sinkType, std::string sinkName){
-    mPipeline.sink = gst_element_factory_make(sinkType.data(), sinkName.data());
+void RecordedVideoPipelineBuilder::setVideoSink(std::string sinkType, std::string sinkName){
+    mPipeline.videosink = gst_element_factory_make(sinkType.data(), sinkName.data());
 }
 
 void RecordedVideoPipelineBuilder:: setState(GstState){
@@ -39,14 +39,14 @@ void RecordedVideoPipelineBuilder::setLiveness(bool livenessState){
 
 void RecordedVideoPipelineBuilder::setPropertiesOfGstElement(std::string pFileLocation, long long int pWindId){
     g_object_set(mPipeline.source , "location", pFileLocation.data(), NULL );
-    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.sink), pWindId);
+    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.videosink), pWindId);
 }
 
 void RecordedVideoPipelineBuilder::addElements(){
-    if(!mPipeline.bin || !mPipeline.source || !mPipeline.decoder || !mPipeline.sink){
+    if(!mPipeline.bin || !mPipeline.source || !mPipeline.videodecoder || !mPipeline.videosink){
         g_printerr("All element could not created\n");
     }
-    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.decoder , mPipeline.sink, NULL);
+    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.videodecoder , mPipeline.videosink, NULL);
 }
 
 void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink) {
@@ -76,6 +76,8 @@ void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink) 
 gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, gpointer data){
     g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
 
+    RecordedVideoPipelineBuilder* tempBuilder = (RecordedVideoPipelineBuilder*) data;
+
     switch (GST_MESSAGE_TYPE(message) ) {
         case GST_MESSAGE_ERROR:
         {
@@ -89,31 +91,31 @@ gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, g
             break;
         }
         case GST_MESSAGE_STATE_CHANGED:
-            //
+            g_print ("GST_MESSAGE_STATE_CHANGED");
             break;
         case GST_MESSAGE_EOS:
-            //
+            g_print ("GST_MESSAGE_EOS");
+            gst_element_set_state (tempBuilder->mPipeline.bin, GST_STATE_READY);
+            gst_element_seek_simple(tempBuilder->mPipeline.bin, GST_FORMAT_TIME,
+                                    GST_SEEK_FLAG_FLUSH, 0);
           break;
         default:
           break;
     }
-
-
     return TRUE;
-
 }
 
 
 void RecordedVideoPipelineBuilder::linkElements(){
-    if( !gst_element_link(mPipeline.source, mPipeline.decoder) ){
+    if( !gst_element_link(mPipeline.source, mPipeline.videodecoder) ){
         g_printerr ("Source and decoder could not be linked.\n");
     }
 
-    if(!gst_element_link(mPipeline.decoder, mPipeline.sink) ){
+    if(!gst_element_link(mPipeline.videodecoder, mPipeline.videosink) ){
         g_printerr ("Decoder and sink could not be linked.\n");
     }
 
-    g_signal_connect(mPipeline.decoder, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.sink);
+    g_signal_connect(mPipeline.videodecoder, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.videosink);
 }
 
 
@@ -121,17 +123,20 @@ void RecordedVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long
     this->setBin(std::string("pipeline"));
     this->setSource(std::string("filesrc"), std::string("source"));
     this->setDecoder(std::string("decodebin"), std::string("decoder"));
-    this->setSink(std::string("glimagesink"), std::string("sink"));
+    this->setVideoSink(std::string("glimagesink"), std::string("sink"));
     this->setLiveness(false);
     this->setPropertiesOfGstElement(pResourcePath, pWindowID);
     this->addElements();
     this->linkElements();
+    this->setBus();
     this->setState(GstState::GST_STATE_READY);
+
 }
 
 void RecordedVideoPipelineBuilder::setBus(){
+    qDebug()<<"svsdvsd";
     mPipeline.bus = gst_pipeline_get_bus (GST_PIPELINE (mPipeline.bin));
-    gst_bus_add_watch (mPipeline.bus, getMessageFromBusForRecordedVideo, NULL);
+    gst_bus_add_watch (mPipeline.bus, (GstBusFunc) getMessageFromBusForRecordedVideo, this);
 }
 
 void RecordedVideoPipelineBuilder::destroyPipeline(){

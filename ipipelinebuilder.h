@@ -9,9 +9,16 @@
 struct Pipeline{
     GstElement* bin;
     GstElement* source;
-    GstElement* decoder;
-    GstElement* depayloader;    //
-    GstElement* sink;
+    GstElement* demuxer;             // only for recorded video
+    GstElement* videoqueue;
+    GstElement* videodepayloader;    // only for live video
+    GstElement* videodecoder;
+    GstElement* videosink;
+    GstElement* audioqueue;
+    GstElement* audiodepayloader;    // only for live video
+    GstElement* audiodecoder;
+    GstElement* audioconvertor;
+    GstElement* audiosink;
     GstBus* bus;
     GstState state;
     bool isLive;
@@ -28,7 +35,7 @@ private:
     virtual void setBin(std::string) = 0;
     virtual void setSource(std::string, std::string) = 0;
     virtual void setDecoder(std::string, std::string) = 0;
-    virtual void setSink(std::string, std::string) = 0;
+    virtual void setVideoSink(std::string, std::string) = 0;
     virtual void setState(GstState) = 0;
     virtual void setLiveness(bool) = 0;
     virtual void setPropertiesOfGstElement(std::string, long long int) = 0;

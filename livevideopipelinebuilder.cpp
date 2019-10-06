@@ -18,15 +18,15 @@ void LiveVideoPipelineBuilder::setSource(std::string sourceType, std::string sou
 }
 
 void LiveVideoPipelineBuilder::setDepayloader(std::string depayloaderType, std::string depayloaderName){
-    mPipeline.depayloader = gst_element_factory_make(depayloaderType.data(), depayloaderName.data());
+    mPipeline.videodepayloader = gst_element_factory_make(depayloaderType.data(), depayloaderName.data());
 }
 
 void LiveVideoPipelineBuilder::setDecoder(std::string decoderType, std::string decoderName){
-    mPipeline.decoder = gst_element_factory_make(decoderType.data(), decoderName.data());
+    mPipeline.videodecoder = gst_element_factory_make(decoderType.data(), decoderName.data());
 }
 
-void LiveVideoPipelineBuilder::setSink(std::string sinkType, std::string sinkName){
-    mPipeline.sink = gst_element_factory_make(sinkType.data(), sinkName.data());
+void LiveVideoPipelineBuilder::setVideoSink(std::string sinkType, std::string sinkName){
+    mPipeline.videosink = gst_element_factory_make(sinkType.data(), sinkName.data());
 }
 
 void LiveVideoPipelineBuilder::setState(GstState){
@@ -39,15 +39,15 @@ void LiveVideoPipelineBuilder::setLiveness(bool livenessState){
 
 void LiveVideoPipelineBuilder::setPropertiesOfGstElement(std::string pVideoSource, long long int pWindId){
     g_object_set(mPipeline.source , "location", pVideoSource.data(), NULL );
-    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.sink), pWindId);
+    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.videosink), pWindId);
 
 }
 
 void LiveVideoPipelineBuilder::addElements(){
-    if(!mPipeline.bin || !mPipeline.source || !mPipeline.depayloader || !mPipeline.decoder || !mPipeline.sink){
+    if(!mPipeline.bin || !mPipeline.source || !mPipeline.videodepayloader || !mPipeline.videodecoder || !mPipeline.videosink){
         g_printerr("All element could not created\n");
     }
-    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.depayloader, mPipeline.decoder , mPipeline.sink, NULL);
+    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.videodepayloader, mPipeline.videodecoder , mPipeline.videosink, NULL);
 }
 
 
@@ -107,17 +107,17 @@ gboolean getMessageFromBusForLiveVideo(GstBus * bus, GstMessage * message, gpoin
 
 
 void LiveVideoPipelineBuilder::linkElements(){
-    if( !gst_element_link(mPipeline.source, mPipeline.depayloader) ){
+    if( !gst_element_link(mPipeline.source, mPipeline.videodepayloader) ){
         g_printerr ("Source and Depayloader could not be linked.\n");
     }
 
-    g_signal_connect(mPipeline.source, "pad-added", G_CALLBACK (onPadAddedForLiveVideo), mPipeline.depayloader);
+    g_signal_connect(mPipeline.source, "pad-added", G_CALLBACK (onPadAddedForLiveVideo), mPipeline.videodepayloader);
 
-    if(!gst_element_link(mPipeline.depayloader, mPipeline.decoder) ){
+    if(!gst_element_link(mPipeline.videodepayloader, mPipeline.videodecoder) ){
         g_printerr ("Depayloader and Decoder could not be linked.\n");
     }
 
-    if(!gst_element_link(mPipeline.decoder, mPipeline.sink) ){
+    if(!gst_element_link(mPipeline.videodecoder, mPipeline.videosink) ){
         g_printerr ("Decoder and Sink could not be linked.\n");
     }
 
@@ -128,7 +128,7 @@ void LiveVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long lon
     this->setSource(std::string("rtspsrc"), std::string("source"));
     this->setDepayloader(std::string("rtph264depay"), std::string("depayloader"));
     this->setDecoder(std::string("avdec_h264"), std::string("decoder"));
-    this->setSink(std::string("glimagesink"), std::string("sink"));
+    this->setVideoSink(std::string("glimagesink"), std::string("sink"));
     this->setLiveness(true);
     this->setPropertiesOfGstElement(pResourcePath, pWindowID);
     this->addElements();

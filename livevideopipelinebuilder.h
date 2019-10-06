@@ -11,9 +11,17 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
 
     void setBin(std::string);
     void setSource(std::string, std::string);
-    void setDepayloader(std::string, std::string);
-    void setDecoder(std::string, std::string);
+    void setVideoQueue(std::string, std::string);
+    void setVideoDepayloader(std::string, std::string);
+    void setVideoDecoder(std::string, std::string);
     void setVideoSink(std::string, std::string);
+    void setAudioDepayloader(std::string, std::string);
+    void setAudioQueue(std::string, std::string);
+    void setAudioDecoder(std::string, std::string);
+    void setAudioConvertor(std::string, std::string);
+    void setAudioSink(std::string, std::string);
+
+
     void setState(GstState);
     void setLiveness(bool);
     void setPropertiesOfGstElement(std::string, long long int);

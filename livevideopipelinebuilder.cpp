@@ -3,10 +3,11 @@
 LiveVideoPipelineBuilder::LiveVideoPipelineBuilder(){
     qDebug()<<"LiveVideoPipelineBuilder::LiveVideoPipelineBuilder";
     gst_init(NULL, NULL);
+    mPipeline.bin = NULL;
 }
 
 LiveVideoPipelineBuilder::~LiveVideoPipelineBuilder(){
-
+    destroyPipeline();
 }
 
 void LiveVideoPipelineBuilder::setBin(std::string pipelineName){
@@ -105,7 +106,7 @@ void onPadAddedForLiveVideo(GstElement *src, GstPad *newPad, gpointer sink){
 gboolean getMessageFromBusForLiveVideo(GstBus * bus, GstMessage * message, gpointer data){
     g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
 
-    switch (GST_MESSAGE_TYPE(message) ) {
+    switch (GST_MESSAGE_TYPE(message) ){
         case GST_MESSAGE_ERROR:
         {
             GError *err;
@@ -193,14 +194,14 @@ void LiveVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long lon
     this->setPropertiesOfGstElement(pResourcePath, pWindowID);
     this->addElements();
     this->linkElements();
-    //this->setBus();
+    this->setBus();
     this->setState(GstState::GST_STATE_READY);
 }
 
 
 void LiveVideoPipelineBuilder::setBus(){
     mPipeline.bus = gst_pipeline_get_bus (GST_PIPELINE (mPipeline.bin));
-    gst_bus_add_watch (mPipeline.bus, getMessageFromBusForLiveVideo, NULL);
+    gst_bus_add_watch (mPipeline.bus, getMessageFromBusForLiveVideo, this);
 }
 
 void LiveVideoPipelineBuilder::destroyPipeline(){

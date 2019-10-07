@@ -2,11 +2,12 @@
 
 RecordedVideoPipelineBuilder::RecordedVideoPipelineBuilder(){
     gst_init(NULL, NULL);
+    mPipeline.bin = NULL;
 }
 
 
 RecordedVideoPipelineBuilder::~RecordedVideoPipelineBuilder(){
-
+    destroyPipeline();
 }
 
 void RecordedVideoPipelineBuilder::setBin(std::string pipelineName){

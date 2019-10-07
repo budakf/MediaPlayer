@@ -29,6 +29,7 @@ class RecordedVideoPipelineBuilder: public IPipelineBuilder{
     void destroyPipeline();
 
 
+
     friend gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, gpointer data);
     friend void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink);
 

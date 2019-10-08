@@ -63,6 +63,7 @@ private slots:
     void on_mSlider_sliderReleased();
     void improveSlider();
     void setVideoTime();
+    void on_mVolumeSlider_sliderReleased();
 };
 
 #endif // PLAYER_H

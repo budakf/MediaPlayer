@@ -9,9 +9,10 @@ class RecordedVideoPipelineBuilder: public IPipelineBuilder{
     Pipeline mPipeline;
     long long int mWindId;
 
-    void setPipeline();
     void setBin(std::string);
     void setSource(std::string, std::string);
+    void setVolume(std::string, std::string);
+    void setLevel(std::string, std::string);
     void setDemuxer(std::string, std::string);
     void setVideoQueue(std::string, std::string);
     void setVideoDecoder(std::string, std::string);

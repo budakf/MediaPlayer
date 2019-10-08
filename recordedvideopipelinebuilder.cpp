@@ -18,6 +18,14 @@ void RecordedVideoPipelineBuilder::setSource(std::string sourceType, std::string
     mPipeline.source = gst_element_factory_make(sourceType.data(), sourceName.data());
 }
 
+void RecordedVideoPipelineBuilder::setVolume(std::string volumeType, std::string volumeName){
+    mPipeline.volume = gst_element_factory_make(volumeType.data(), volumeName.data());
+}
+
+void RecordedVideoPipelineBuilder::setLevel(std::string levelType, std::string levelName){
+    mPipeline.level = gst_element_factory_make(levelType.data(), levelName.data());
+}
+
 void RecordedVideoPipelineBuilder::setDemuxer(std::string demuxerType, std::string demuxerName){
     mPipeline.demuxer = gst_element_factory_make(demuxerType.data(), demuxerName.data());
 }
@@ -57,16 +65,17 @@ void RecordedVideoPipelineBuilder::setLiveness(bool livenessState){
 
 void RecordedVideoPipelineBuilder::setPropertiesOfGstElement(std::string pFileLocation, long long int pWindId){
     g_object_set(mPipeline.source , "location", pFileLocation.data(), NULL );
+    g_object_set(mPipeline.volume , "volume", 0.5, NULL );
     gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.videosink), pWindId);
 }
 
 void RecordedVideoPipelineBuilder::addElements(){
     if(!mPipeline.bin || !mPipeline.source || !mPipeline.demuxer || !mPipeline.videoqueue || !mPipeline.videodecoder ||
-       !mPipeline.videosink || !mPipeline.audioqueue || !mPipeline.audiodecoder || !mPipeline.audiosink){
+       !mPipeline.videosink || !mPipeline.audioqueue || !mPipeline.audiodecoder || !mPipeline.volume || !mPipeline.level || !mPipeline.audiosink){
         g_printerr("All element could not created\n");
     }
-    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.demuxer, mPipeline.videoqueue,
-                      mPipeline.videodecoder , mPipeline.videosink, mPipeline.audioqueue, mPipeline.audiodecoder, mPipeline.audiosink, NULL);
+    gst_bin_add_many (GST_BIN (mPipeline.bin), mPipeline.source, mPipeline.demuxer, mPipeline.videoqueue, mPipeline.videodecoder,
+                      mPipeline.videosink, mPipeline.audioqueue, mPipeline.audiodecoder, mPipeline.volume, mPipeline.level, mPipeline.audiosink, NULL);
 }
 
 void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink) {
@@ -151,9 +160,18 @@ void RecordedVideoPipelineBuilder::linkElements(){
         g_printerr ("Audioqueue and Audiodecoder could not be linked.\n");
     }
 
-    if( !gst_element_link(mPipeline.audiodecoder, mPipeline.audiosink) ){
-        g_printerr ("Audiodecoder and Audiosink could not be linked.\n");
+    if( !gst_element_link(mPipeline.audiodecoder, mPipeline.volume) ){
+        g_printerr ("Audiodecoder and Volume could not be linked.\n");
     }
+
+    if( !gst_element_link(mPipeline.volume, mPipeline.level) ){
+        g_printerr ("Volume and Level could not be linked.\n");
+    }
+
+    if( !gst_element_link(mPipeline.level, mPipeline.audiosink) ){
+        g_printerr ("Level and Audiosink could not be linked.\n");
+    }
+
     g_signal_connect(mPipeline.demuxer, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.videoqueue);
     g_signal_connect(mPipeline.videodecoder, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.videosink);
     g_signal_connect(mPipeline.demuxer, "pad-added", G_CALLBACK (onPadAddedForRecordedVideo), mPipeline.audioqueue);
@@ -170,6 +188,8 @@ void RecordedVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long
     this->setVideoSink(std::string("glimagesink"), std::string("videosink"));
     this->setAudioQueue(std::string("queue"), std::string("audioqueue"));
     this->setAudioDecoder(std::string("faad"), std::string("audiodecoder"));
+    this->setVolume(std::string("volume"), std::string("volume"));
+    this->setLevel(std::string("level"), std::string("level"));
     this->setAudioSink(std::string("autoaudiosink"), std::string("audiosink"));
 
     this->setLiveness(false);

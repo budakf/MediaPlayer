@@ -11,6 +11,8 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
 
     void setBin(std::string);
     void setSource(std::string, std::string);
+    void setVolume(std::string, std::string);
+    void setLevel(std::string, std::string);
     void setVideoQueue(std::string, std::string);
     void setVideoDepayloader(std::string, std::string);
     void setVideoDecoder(std::string, std::string);
@@ -21,7 +23,6 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
     void setAudioConvertor(std::string, std::string);
     void setAudioSink(std::string, std::string);
 
-
     void setState(GstState);
     void setLiveness(bool);
     void setPropertiesOfGstElement(std::string, long long int);
@@ -29,7 +30,6 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
     void linkElements();
     void setBus();    
     void destroyPipeline();
-
 
     friend gboolean getMessageFromBusForLiveVideo(GstBus * bus, GstMessage * message, gpointer data);
     friend void onPadAddedForLiveVideo(GstElement *src, GstPad *newPad, gpointer sink);

@@ -99,11 +99,11 @@ void Player::openNetworkDialog(){
 
 
 void Player::increaseVolume(){
-
+    g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() + 10) * 0.01, NULL);
 }
 
 void Player::decreaseVolume(){
-
+    g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() - 10) * 0.01, NULL);
 }
 
 void Player::convertRGB(){
@@ -125,6 +125,7 @@ void Player::play(){
     else if(mState == PlayerState::LIVESTATE){
         ui->mSlider->setValue(ui->mSlider->maximum());
         ui->mSlider->setDisabled(true);
+         ui->mVideoTime->setText( QDateTime::fromTime_t(0).toUTC().toString("hh:mm:ss") );
     }
 }
 
@@ -206,5 +207,8 @@ void Player::improveSlider(){
 void Player::setVideoTime(){
     int time = ui->mSlider->value();
     ui->mVideoTime->setText( QDateTime::fromTime_t(time).toUTC().toString("hh:mm:ss") );
+}
 
+void Player::on_mVolumeSlider_sliderReleased(){
+    g_object_set(mPipelineBuilder->getPipeline().volume, "volume", ui->mVolumeSlider->value() * 0.01, NULL);
 }

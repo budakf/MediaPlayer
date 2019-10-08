@@ -9,6 +9,8 @@
 struct Pipeline{
     GstElement* bin;
     GstElement* source;
+    GstElement* volume;              // for audio
+    GstElement* level;               // for audio
     GstElement* demuxer;             // only for recorded video
     GstElement* videoqueue;
     GstElement* videodepayloader;    // only for live video
@@ -24,6 +26,7 @@ struct Pipeline{
     bool isLive;
 };
 
+
 class IPipelineBuilder{
 
 public:
@@ -34,6 +37,8 @@ public:
 private:
     virtual void setBin(std::string) = 0;
     virtual void setSource(std::string, std::string) = 0;
+    virtual void setVolume(std::string, std::string) = 0;
+    virtual void setLevel(std::string, std::string) = 0;
     virtual void setVideoQueue(std::string, std::string) = 0;
     virtual void setVideoDecoder(std::string, std::string) = 0;
     virtual void setVideoSink(std::string, std::string) = 0;

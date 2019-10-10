@@ -22,9 +22,9 @@ class LiveVideoPipelineBuilder : public IPipelineBuilder{
     void setAudioDecoder(std::string, std::string);
     void setAudioConvertor(std::string, std::string);
     void setAudioSink(std::string, std::string);
-
     void setState(GstState);
     void setLiveness(bool);
+
     void setPropertiesOfGstElement(std::string, long long int);
     void addElements();
     void linkElements();

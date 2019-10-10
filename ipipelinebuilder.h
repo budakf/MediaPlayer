@@ -45,9 +45,9 @@ private:
     virtual void setAudioQueue(std::string, std::string) = 0;
     virtual void setAudioDecoder(std::string, std::string) = 0;
     virtual void setAudioSink(std::string, std::string) = 0;
-
     virtual void setState(GstState) = 0;
     virtual void setLiveness(bool) = 0;
+
     virtual void setPropertiesOfGstElement(std::string, long long int) = 0;
     virtual void addElements() = 0;
     virtual void linkElements() = 0;

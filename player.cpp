@@ -99,10 +99,12 @@ void Player::openNetworkDialog(){
 
 
 void Player::increaseVolume(){
+    ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() + 10);
     g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() + 10) * 0.01, NULL);
 }
 
 void Player::decreaseVolume(){
+    ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() - 10);
     g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() - 10) * 0.01, NULL);
 }
 

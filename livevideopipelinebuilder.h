@@ -1,8 +1,9 @@
 #ifndef LIVEVIDEOPIPELINEBUILDER_H
 #define LIVEVIDEOPIPELINEBUILDER_H
 
-#include "ipipelinebuilder.h"
 #include <QDebug>
+
+#include "ipipelinebuilder.h"
 
 class LiveVideoPipelineBuilder : public IPipelineBuilder{
 
@@ -38,9 +39,7 @@ public:
     LiveVideoPipelineBuilder();
     ~LiveVideoPipelineBuilder();
     void buildPipeline(std::string, long long int);
-    Pipeline & getPipeline(){
-        return mPipeline;
-    }
+    Pipeline & getPipeline(){ return mPipeline; }
 
 };
 

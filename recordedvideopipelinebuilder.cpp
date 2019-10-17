@@ -55,18 +55,20 @@ void RecordedVideoPipelineBuilder::setAudioSink(std::string audiosinkType, std::
     mPipeline.audiosink = gst_element_factory_make(audiosinkType.data(), audiosinkName.data());
 }
 
-void RecordedVideoPipelineBuilder:: setState(GstState){
-    mPipeline.state = GstState::GST_STATE_PAUSED;
+void RecordedVideoPipelineBuilder:: setState(GstState pState){
+    mPipeline.state = pState;
 }
 
 void RecordedVideoPipelineBuilder::setLiveness(bool livenessState){
     mPipeline.isLive = livenessState;
 }
 
-void RecordedVideoPipelineBuilder::setPropertiesOfGstElement(std::string pFileLocation, long long int pWindId){
+void RecordedVideoPipelineBuilder::setPropertiesOfGstElement(std::string pFileLocation, long long int pWinId){
+    mFileLocation = pFileLocation;
+    mWinId = pWinId;
     g_object_set(mPipeline.source , "location", pFileLocation.data(), NULL );
     g_object_set(mPipeline.volume , "volume", 0.5, NULL );
-    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.videosink), pWindId);
+    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (mPipeline.videosink), pWinId);
 }
 
 void RecordedVideoPipelineBuilder::addElements(){
@@ -78,7 +80,7 @@ void RecordedVideoPipelineBuilder::addElements(){
                       mPipeline.videosink, mPipeline.audioqueue, mPipeline.audiodecoder, mPipeline.volume, mPipeline.level, mPipeline.audiosink, NULL);
 }
 
-void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink) {
+void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink){
     GstPad *sink_pad = gst_element_get_static_pad ((GstElement *)sink, "sink");
     GstPadLinkReturn ret;
 
@@ -103,7 +105,7 @@ void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink) 
 
 
 gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, gpointer data){
-    g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
+    //g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
 
     RecordedVideoPipelineBuilder* tempBuilder = (RecordedVideoPipelineBuilder*) data;
 
@@ -112,7 +114,6 @@ gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, g
         {
             GError *err;
             gchar *debug;
-
             gst_message_parse_error (message, &err, &debug);
             g_print ("Error: %s\n", err->message);
             g_error_free (err);
@@ -120,17 +121,15 @@ gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, g
             break;
         }
         case GST_MESSAGE_STATE_CHANGED:
-            g_print ("GST_MESSAGE_STATE_CHANGED");
+            //g_print ("GST_MESSAGE_STATE_CHANGED");
             break;
         case GST_MESSAGE_EOS:
             g_print ("GST_MESSAGE_EOS");
-            gst_element_set_state (tempBuilder->mPipeline.bin, GST_STATE_READY);
-            gst_element_seek_simple(tempBuilder->mPipeline.bin, GST_FORMAT_TIME,
-                                    GST_SEEK_FLAG_FLUSH, 0);
           break;
         default:
           break;
     }
+
     return TRUE;
 }
 
@@ -180,6 +179,7 @@ void RecordedVideoPipelineBuilder::linkElements(){
 
 
 void RecordedVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long long int pWindowID){
+
     this->setBin(std::string("pipeline"));
     this->setSource(std::string("filesrc"), std::string("source"));
     this->setDemuxer(std::string("qtdemux"), std::string("demuxer"));
@@ -197,21 +197,17 @@ void RecordedVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long
     this->addElements();
     this->linkElements();
     this->setBus();
-    this->setState(GstState::GST_STATE_READY);
-
+    this->setState(GstState::GST_STATE_PAUSED);
 }
 
 void RecordedVideoPipelineBuilder::setBus(){
     mPipeline.bus = gst_pipeline_get_bus (GST_PIPELINE (mPipeline.bin));
-    gst_bus_add_watch (mPipeline.bus, (GstBusFunc) getMessageFromBusForRecordedVideo, this);
+    //gst_bus_add_watch (mPipeline.bus, getMessageFromBusForRecordedVideo, this);
+    gst_bus_set_sync_handler(mPipeline.bus, (GstBusSyncHandler)getMessageFromBusForRecordedVideo, this, NULL);
 }
 
 void RecordedVideoPipelineBuilder::destroyPipeline(){
     g_object_unref(mPipeline.bus);
     gst_element_set_state (mPipeline.bin, GST_STATE_NULL);
     g_object_unref (mPipeline.bin);
-
 }
-
-
-

@@ -111,14 +111,13 @@ void onPadAddedForLiveVideo(GstElement *src, GstPad *newPad, gpointer sink){
 
 
 gboolean getMessageFromBusForLiveVideo(GstBus * bus, GstMessage * message, gpointer data){
-    g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
+    //g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
 
     switch (GST_MESSAGE_TYPE(message) ){
         case GST_MESSAGE_ERROR:
         {
             GError *err;
             gchar *debug;
-
             gst_message_parse_error (message, &err, &debug);
             g_print ("Error: %s\n", err->message);
             g_error_free (err);
@@ -217,7 +216,9 @@ void LiveVideoPipelineBuilder::buildPipeline(std::string pResourcePath, long lon
 
 void LiveVideoPipelineBuilder::setBus(){
     mPipeline.bus = gst_pipeline_get_bus (GST_PIPELINE (mPipeline.bin));
-    gst_bus_add_watch (mPipeline.bus, getMessageFromBusForLiveVideo, this);
+    //gst_bus_add_watch (mPipeline.bus, getMessageFromBusForLiveVideo, this);
+    gst_bus_set_sync_handler(mPipeline.bus, (GstBusSyncHandler)getMessageFromBusForLiveVideo, this, NULL);
+
 }
 
 void LiveVideoPipelineBuilder::destroyPipeline(){

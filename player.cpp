@@ -75,6 +75,7 @@ void Player::openNewFileDialog(){
         ui->mRewindBtn->show();
         ui->mForwardBtn->show();
         ui->mSlider->setValue(0);
+        ui->mVolumeSlider->setValue(50);
         play();
     }
 }
@@ -93,19 +94,24 @@ void Player::openNetworkDialog(){
         mState = PlayerState::LIVESTATE;
         ui->mRewindBtn->hide();
         ui->mForwardBtn->hide();
+        ui->mVolumeSlider->setValue(50);
         play();
     }
 }
 
 
 void Player::increaseVolume(){
-    ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() + 10);
-    g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() + 10) * 0.01, NULL);
+    if(mPipelineBuilder){
+        ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() + 10);
+        g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() + 10) * 0.01, NULL);
+    }
 }
 
 void Player::decreaseVolume(){
-    ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() - 10);
-    g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() - 10) * 0.01, NULL);
+    if(mPipelineBuilder){
+        ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() - 10);
+        g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() - 10) * 0.01, NULL);
+    }
 }
 
 void Player::convertRGB(){

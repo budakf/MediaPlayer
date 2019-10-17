@@ -7,7 +7,6 @@
 #include <QInputDialog>
 #include <QTimer>
 #include <QDateTime>
-
 #include <iostream>
 #include <memory>
 
@@ -64,6 +63,7 @@ private slots:
     void improveSlider();
     void setVideoTime();
     void on_mVolumeSlider_sliderReleased();
+    //void replayVideo();
 };
 
 #endif // PLAYER_H

@@ -63,7 +63,7 @@ private slots:
     void improveSlider();
     void setVideoTime();
     void on_mVolumeSlider_sliderReleased();
-    //void replayVideo();
+    void resetVideo();
 };
 
 #endif // PLAYER_H

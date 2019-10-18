@@ -107,7 +107,7 @@ void onPadAddedForRecordedVideo(GstElement *src, GstPad *newPad, gpointer sink){
 gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, gpointer data){
     //g_print ("Got %s message\n", GST_MESSAGE_TYPE_NAME (message) );
 
-    RecordedVideoPipelineBuilder* tempBuilder = (RecordedVideoPipelineBuilder*) data;
+    IPipelineBuilder* tempBuilder = (RecordedVideoPipelineBuilder*) data;
 
     switch (GST_MESSAGE_TYPE(message) ) {
         case GST_MESSAGE_ERROR:
@@ -125,6 +125,7 @@ gboolean getMessageFromBusForRecordedVideo(GstBus * bus, GstMessage * message, g
             break;
         case GST_MESSAGE_EOS:
             g_print ("GST_MESSAGE_EOS");
+            tempBuilder->resetVideo();
           break;
         default:
           break;

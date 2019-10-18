@@ -41,6 +41,9 @@ public:
     void buildPipeline(std::string, long long int);
     Pipeline & getPipeline(){ return mPipeline; }
 
+signals:
+    void resetVideo();
+
 };
 
 #endif // LIVEVIDEOPIPELINEBUILDER_H

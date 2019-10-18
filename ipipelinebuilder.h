@@ -1,6 +1,7 @@
 #ifndef IPIPELINEBUILDER_H
 #define IPIPELINEBUILDER_H
 
+#include <QObject>
 #include <memory>
 #include <string>
 #include "gst/gst.h"
@@ -27,14 +28,10 @@ struct Pipeline{
 };
 
 
-class IPipelineBuilder{
+class IPipelineBuilder : public QObject{
 
-public:
-    virtual void buildPipeline(std::string, long long int) = 0;
-    virtual ~IPipelineBuilder(){}
-    virtual Pipeline & getPipeline() = 0;
+    Q_OBJECT
 
-private:
     virtual void setBin(std::string) = 0;
     virtual void setSource(std::string, std::string) = 0;
     virtual void setVolume(std::string, std::string) = 0;
@@ -53,6 +50,14 @@ private:
     virtual void linkElements() = 0;
     virtual void setBus() = 0;
     virtual void destroyPipeline() = 0;
+
+public:
+    virtual void buildPipeline(std::string, long long int) = 0;
+    virtual ~IPipelineBuilder(){}
+    virtual Pipeline & getPipeline() = 0;
+
+signals:
+    void resetVideo();
 
 };
 

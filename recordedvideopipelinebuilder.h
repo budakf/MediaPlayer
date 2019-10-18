@@ -42,6 +42,9 @@ public:
     std::string getFileLocation(){ return mFileLocation; }
     long long int getWinId(){ return mWinId; }
 
+signals:
+    void resetVideo();
+
 };
 
 

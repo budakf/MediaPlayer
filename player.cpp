@@ -77,6 +77,7 @@ void Player::openNewFileDialog(){
         ui->mSlider->setValue(0);
         ui->mVolumeSlider->setValue(50);
         play();
+        connect(mPipelineBuilder.get(), &IPipelineBuilder::resetVideo, this, &Player::resetVideo);
     }
 }
 
@@ -140,6 +141,7 @@ void Player::play(){
 void Player::stop(){
     gst_element_set_state (mPipelineBuilder->getPipeline().bin, GST_STATE_NULL);
     mRunning = false;
+    mTimer->stop();
 }
 
 void Player::pause(){
@@ -219,4 +221,16 @@ void Player::setVideoTime(){
 
 void Player::on_mVolumeSlider_sliderReleased(){
     g_object_set(mPipelineBuilder->getPipeline().volume, "volume", ui->mVolumeSlider->value() * 0.01, NULL);
+}
+
+void Player::resetVideo(){
+    ui->mVideoTime->setText( QDateTime::fromTime_t(0).toUTC().toString("hh:mm:ss") );
+    ui->mPlayBtn->setText("Play");
+    ui->mSlider->setValue(0);
+    mRunning = false;
+    mTimer->stop();
+    gst_element_seek_simple(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME,
+                            GST_SEEK_FLAG_FLUSH, 0);
+    gst_element_set_state(mPipelineBuilder->getPipeline().bin, GST_STATE_PAUSED);
+
 }

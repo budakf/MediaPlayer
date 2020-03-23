@@ -27,14 +27,18 @@ CONFIG += c++17
 SOURCES += \
         livevideopipelinebuilder.cpp \
         main.cpp \
+        multipleinputdialog.cpp \
         player.cpp \
-        recordedvideopipelinebuilder.cpp
+        recordedvideopipelinebuilder.cpp \
+        recorder.cpp
 
 HEADERS += \
         ipipelinebuilder.h \
         livevideopipelinebuilder.h \
+        multipleinputdialog.h \
         player.h \
-        recordedvideopipelinebuilder.h
+        recordedvideopipelinebuilder.h \
+        recorder.h
 
 FORMS += \
         player.ui
@@ -47,22 +51,22 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 macos{
 
-    INCLUDEPATH += /usr/local/Cellar/gstreamer/1.16.1/include/gstreamer-1.0/gst
+    INCLUDEPATH += /usr/local/Cellar/gstreamer/1.16.2/include/gstreamer-1.0/gst
     INCLUDEPATH += /usr/local/Cellar/libffi/3.2.1/lib/libffi-3.2.1/include \
-                   /usr/local/Cellar/gst-plugins-base/1.16.1/include/gstreamer-1.0 \
-                   /usr/local/Cellar/gst-plugins-bad/1.16.1/include/gstreamer-1.0 \
+                   /usr/local/Cellar/gst-plugins-base/1.16.2/include/gstreamer-1.0 \
+                   /usr/local/Cellar/gst-plugins-bad/1.16.2/include/gstreamer-1.0 \
                    /usr/local/Cellar/orc/0.4.28/include/orc-0.4 \
-                   /usr/local/Cellar/gstreamer/1.16.1/include/gstreamer-1.0 \
-                   /usr/local/Cellar/glib/2.62.1/include \
-                   /usr/local/Cellar/glib/2.62.1/include/glib-2.0  \
-                   /usr/local/Cellar/glib/2.62.1/lib/glib-2.0/include \
+                   /usr/local/Cellar/gstreamer/1.16.2/include/gstreamer-1.0 \
+                   /usr/local/Cellar/glib/2.62.4/include \
+                   /usr/local/Cellar/glib/2.62.4/include/glib-2.0  \
+                   /usr/local/Cellar/glib/2.62.4/lib/glib-2.0/include \
                    /usr/local/opt/gettext/include \
                    /usr/local/Cellar/pcre/8.43/include
 
-    LIBS += -L/usr/local/Cellar/gst-plugins-base/1.16.1/lib \
-            -L/usr/local/Cellar/gst-plugins-bad/1.16.1/lib \
-            -L/usr/local/Cellar/gstreamer/1.16.1/lib  \
-            -L/usr/local/Cellar/glib/2.62.1/lib  \
+    LIBS += -L/usr/local/Cellar/gst-plugins-base/1.16.2/lib \
+            -L/usr/local/Cellar/gst-plugins-bad/1.16.2/lib \
+            -L/usr/local/Cellar/gstreamer/1.16.2/lib  \
+            -L/usr/local/Cellar/glib/2.62.4/lib  \
             -L/usr/local/opt/gettext/lib \
             -lgstvideo-1.0 -lgstbase-1.0 -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lintl
 

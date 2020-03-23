@@ -271,10 +271,18 @@ border-style: none;</string>
     <addaction name="actionRGB"/>
     <addaction name="actionGrayScale"/>
    </widget>
+   <widget class="QMenu" name="menuVideoRecord">
+    <property name="title">
+     <string>Video Record</string>
+    </property>
+    <addaction name="actionNewRecord"/>
+    <addaction name="actionStopRecord"/>
+   </widget>
    <addaction name="menuMediaPlayer"/>
    <addaction name="menuFile"/>
    <addaction name="menuAudio"/>
    <addaction name="menuVideo"/>
+   <addaction name="menuVideoRecord"/>
   </widget>
   <action name="actionAboutMediaPlayer">
    <property name="text">
@@ -329,6 +337,19 @@ border-style: none;</string>
   <action name="actionQuitMediaPlayer">
    <property name="text">
     <string>Quit MediaPlayer</string>
+   </property>
+  </action>
+  <action name="actionNewRecord">
+   <property name="text">
+    <string>New Record</string>
+   </property>
+  </action>
+  <action name="actionStopRecord">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Stop Record</string>
    </property>
   </action>
  </widget>

@@ -21,6 +21,7 @@ void Player::setMenus(){
     setFileMenu();
     setAudioMenu();
     setVideoMenu();
+    setVideoRecordMenu();
 }
 
 
@@ -47,8 +48,13 @@ void Player::setAudioMenu(){
 
 
 void Player::setVideoMenu(){
-    connect(ui->actionVolumeUp, &QAction::triggered, this, &Player::convertRGB);
-    connect(ui->actionVolumeDown, &QAction::triggered, this, &Player::convertGrayScale);
+    connect(ui->actionRGB, &QAction::triggered, this, &Player::convertRGB);
+    connect(ui->actionGrayScale, &QAction::triggered, this, &Player::convertGrayScale);
+}
+
+void Player::setVideoRecordMenu(){
+    connect(ui->actionNewRecord, &QAction::triggered, this, &Player::openNewRecordDialog);
+    connect(ui->actionStopRecord, &QAction::triggered, this, &Player::stopRecord);
 }
 
 
@@ -103,6 +109,7 @@ void Player::openNetworkDialog(){
 
 void Player::increaseVolume(){
     if(mPipelineBuilder){
+        qDebug()<<"increaseVolume";
         ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() + 10);
         g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() + 10) * 0.01, NULL);
     }
@@ -110,18 +117,38 @@ void Player::increaseVolume(){
 
 void Player::decreaseVolume(){
     if(mPipelineBuilder){
+        qDebug()<<"decreaseVolume";
         ui->mVolumeSlider->setValue(ui->mVolumeSlider->value() - 10);
         g_object_set(mPipelineBuilder->getPipeline().volume, "volume", (ui->mVolumeSlider->value() - 10) * 0.01, NULL);
     }
 }
 
 void Player::convertRGB(){
-
+    if(mPipelineBuilder){
+        qDebug()<<"convertRGB";
+        g_object_set(mPipelineBuilder->getPipeline().videosink, "saturation", 1.0, NULL);
+    }
 }
 
 void Player::convertGrayScale(){
-
+    if(mPipelineBuilder){
+        qDebug()<<"convertGrayScale";
+        g_object_set(mPipelineBuilder->getPipeline().videosink, "saturation", 0.0, NULL);
+    }
 }
+
+void Player::openNewRecordDialog(){
+    mRecordPaths.clear();
+
+    QStringList labels;
+    labels << "Resource Path: " << "File Path: ";
+    mRecordPaths = MultipleInputDialog::getTexts(labels, this );
+
+    if( !mRecordPaths.at(0).isEmpty() && !mRecordPaths.at(1).isEmpty() ){
+        startRecord(mRecordPaths);
+    }
+}
+
 
 void Player::play(){
     gst_element_set_state(mPipelineBuilder->getPipeline().bin, GST_STATE_PLAYING);
@@ -148,6 +175,19 @@ void Player::pause(){
     gst_element_set_state(mPipelineBuilder->getPipeline().bin, GST_STATE_PAUSED);
     mRunning = false;
     mTimer->stop();
+}
+
+void Player::startRecord(QStringList pRecordPaths){
+    mRecorder.reset(nullptr);
+    mRecorder = std::make_unique<Recorder>();
+    mRecorder->buildPipeline(pRecordPaths.at(0).toStdString(), pRecordPaths.at(1).toStdString());
+    mRecorder->startRecord();
+    enableActionStopRecord();
+}
+
+void Player::stopRecord(){
+    mRecorder->stopRecord();
+    disableActionStopRecord();
 }
 
 void Player::enablePlayingButtons(bool pEnabled){
@@ -200,7 +240,6 @@ void Player::on_mSlider_sliderReleased(){
     setVideoTime();
 }
 
-
 void Player::improveSlider(){
     if(mState == PlayerState::RECORDEDSTATE){
         qint64 length;
@@ -215,7 +254,7 @@ void Player::improveSlider(){
 }
 
 void Player::setVideoTime(){
-    int time = ui->mSlider->value();
+    uint time = static_cast<uint>( ui->mSlider->value() );
     ui->mVideoTime->setText( QDateTime::fromTime_t(time).toUTC().toString("hh:mm:ss") );
 }
 
@@ -229,8 +268,15 @@ void Player::resetVideo(){
     ui->mSlider->setValue(0);
     mRunning = false;
     mTimer->stop();
-    gst_element_seek_simple(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME,
-                            GST_SEEK_FLAG_FLUSH, 0);
+    gst_element_seek_simple(mPipelineBuilder->getPipeline().bin, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, 0);
     gst_element_set_state(mPipelineBuilder->getPipeline().bin, GST_STATE_PAUSED);
-
 }
+
+void Player::enableActionStopRecord(){
+    this->ui->actionStopRecord->setEnabled(true);
+}
+
+void Player::disableActionStopRecord(){
+    this->ui->actionStopRecord->setEnabled(false);
+}
+

@@ -92,12 +92,12 @@ void onPadAddedForLiveVideo(GstElement *src, GstPad *newPad, gpointer sink){
 
     g_print ("Received new pad '%s' from '%s':\n", GST_PAD_NAME (newPad), GST_ELEMENT_NAME (src));
 
-    if (gst_pad_is_linked (sink_pad)) {
+    if (gst_pad_is_linked (sink_pad)){
       g_print ("We are already linked. Ignoring.\n");
       return;
     }
 
-    ret = gst_pad_link (newPad, sink_pad);
+    ret = gst_pad_link(newPad, sink_pad);
     if (GST_PAD_LINK_FAILED (ret)){
         g_print ("Link failed.\n");
     }

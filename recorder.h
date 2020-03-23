@@ -3,15 +3,47 @@
 
 #include <QObject>
 
-class Recorder : public QObject
-{
-    Q_OBJECT
-public:
-    explicit Recorder(QObject *parent = nullptr);
+#include <glib.h>
+#include "gst/gst.h"
+#include "gst/video/videooverlay.h"
 
-signals:
 
-public slots:
+struct RecorderPipeline{
+    GstElement* bin;
+    GstElement* source;
+    GstElement* videoDepayloader;
+    GstElement* h264parser;
+    GstElement* muxer;
+    GstElement* sink;
+    GstBus* bus;
 };
 
+
+class Recorder : public QObject{
+    Q_OBJECT
+
+
+public:
+    Recorder(QObject *parent = nullptr);
+    ~Recorder();
+
+    void buildPipeline(std::string, std::string);
+    void startRecord();
+    void stopRecord();
+
+    friend void onPadAddedForRecorder(GstElement*, GstPad*, gpointer);
+    friend gboolean getMessageFromBusForRecorder(GstBus*, GstMessage*, gpointer);
+    friend gpointer pushEosThread(gpointer);
+
+
+private:
+    RecorderPipeline* mRecorderPipeline;
+
+    void setPropertiesOfGstElement(std::string, std::string);
+    void addElements();
+    void linkElements();
+    void setBus();
+    void destroyPipeline();
+
+};
 #endif // RECORDER_H

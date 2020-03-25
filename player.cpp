@@ -274,9 +274,11 @@ void Player::resetVideo(){
 
 void Player::enableActionStopRecord(){
     this->ui->actionStopRecord->setEnabled(true);
+    this->ui->actionNewRecord->setEnabled(false);
 }
 
 void Player::disableActionStopRecord(){
     this->ui->actionStopRecord->setEnabled(false);
+    this->ui->actionNewRecord->setEnabled(true);
 }
 

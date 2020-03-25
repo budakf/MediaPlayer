@@ -11,8 +11,12 @@
 struct RecorderPipeline{
     GstElement* bin;
     GstElement* source;
+    GstElement* videoQueue;
     GstElement* videoDepayloader;
-    GstElement* h264parser;
+    GstElement* h264Parser;
+    GstElement* audioQueue;
+    GstElement* audioDepayloader;
+    GstElement* aacParser;
     GstElement* muxer;
     GstElement* sink;
     GstBus* bus;
